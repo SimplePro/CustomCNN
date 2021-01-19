@@ -127,14 +127,16 @@ class CustomCnn:
         try:
             data["train_set"] = self.train_set
             data["test_set"] = self.test_set
-        except: pass
+        except:
+            pass
 
         try:
             data["x_train"] = self.x_train
             data["y_train"] = self.y_train
             data["x_test"] = self.x_test
             data["y_test"] = self.y_test
-        except: pass
+        except:
+            pass
 
         with open(directory + "/" + self.model_name + ".json", "w") as f:
             json.dump(data, f, indent=4)
