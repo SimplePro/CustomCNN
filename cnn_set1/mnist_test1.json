@@ -1,0 +1,1 @@
+{"generator": false, "image_shape": null, "batch_size": 128, "model_name": "mnist_test1", "class_indices": {}, "model": "C:\\kimdonghwan\\python\\ImageClassifier\\cnn_set1\\mnist_test1.h5"}
