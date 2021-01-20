@@ -1,0 +1,1 @@
+{"generator": true, "image_shape": [64, 64], "batch_size": 20, "model_name": "dog_cat_test2", "class_indices": {"cats": 0, "dogs": 1}, "model": "C:\\kimdonghwan\\python\\ImageClassifier\\cnn_set1\\dog_cat_test2.h5"}
