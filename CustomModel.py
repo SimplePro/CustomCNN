@@ -10,7 +10,7 @@ import os
 
 class CustomCnn:
 
-    # 초기화
+    # init
     def __init__(self, generator=False, model_name=None):
         if model_name is None:
             raise Exception("model_name must not be None")
@@ -18,7 +18,7 @@ class CustomCnn:
         self.model_name = model_name
         self.class_indices = {}
 
-    # 오토 모델링
+    # auto modeling
     def _auto_modeling(self, input_shape=None, class_n=None):
         if input_shape is None:
             raise Exception("input_shape must not be None")
@@ -51,7 +51,7 @@ class CustomCnn:
 
         self.model.add(Dense(class_n, activation='softmax'))
 
-    # 모델링
+    # modeling
     def _modeling(self, model_info=None):
         if model_info is None:
             raise Exception("model_info must not be None")
@@ -61,7 +61,7 @@ class CustomCnn:
         for mi in model_info:
             self.model.add(mi)
 
-    # 컴파일링
+    # compiling
     def _compiling(self, loss=None, optimizer=None, metrics=None):
         if loss is None:
             raise Exception("loss must not be None")
@@ -74,16 +74,16 @@ class CustomCnn:
             loss=loss, optimizer=optimizer, metrics=metrics
         )
 
-    # 서머리
+    # summary
     def _summary(self):
         return self.model.summary()
 
-    # train_set 과 test_set 을 다시 지정하는 메소드.
+    # method to set train_set and test_set again
     def _set_data_generator(self, train_set, test_set):
         self.train_set = train_set
         self.test_set = test_set
 
-    # 학습
+    # fit
     def _fit(self, train_data_generator=None, test_data_generator=None, train_directory=None, test_directory=None,
              train_set=None, test_set=None, target_size=None, epochs=None, steps_per_epoch=None, validation_steps=None,
              batch_size=None, verbose=None):
@@ -149,14 +149,14 @@ class CustomCnn:
             self.model.fit(self.x_train, self.y_train, validation_data=test_set,
                            epochs=epochs, batch_size=batch_size, verbose=verbose)
 
-    # 평가
+    # evaluate model
     def _evaluate(self, x_data=None, y_data=None):
         if self.generator:
             return self.model.evaluate_generator(self.test_set)
         if not self.generator:
             return self.model.evaluate(x_data, y_data)
 
-    # 예측
+    # predict
     def _predict(self, img):
         if self.generator:
             result = self.model.predict(img)
@@ -170,7 +170,7 @@ class CustomCnn:
             label = self.model.predict_classes(img)
             return label
 
-    # 모델을 저장하는 메소드.
+    # method to save model as file
     def _save_model(self, directory=None):
         if directory is None:
             raise Exception("directory must not be None")
@@ -183,7 +183,7 @@ class CustomCnn:
         with open(directory + self.model_name + ".json", "w") as f:
             json.dump(data, f)
 
-    # 모델을 로드하는 메소드
+    # method to load model as model_name
     def _load_model(self, directory=None, model_name=None):
         if directory is None:
             raise Exception("directory must not be None")
@@ -199,7 +199,7 @@ class CustomCnn:
             self.class_indices = json_data["class_indices"]
             self.model = load_model(json_data["model"])
 
-    # 정보를 반환하는 메소드.
+    # method to return info
     def _info(self):
         return {"generator": self.generator, "image_shape": self.image_shape, "batch_size": self.batch_size,
                 "model_name": self.model_name, "class_indices": self.class_indices}
