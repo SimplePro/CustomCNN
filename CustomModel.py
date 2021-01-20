@@ -5,6 +5,8 @@ import json
 from keras.layers import *
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 
+import os
+
 
 class CustomCnn:
 
@@ -71,13 +73,17 @@ class CustomCnn:
     def _summary(self):
         return self.model.summary()
 
+    def _set_data_generator(self, train_set, test_set):
+        self.train_set = train_set
+        self.test_set = test_set
+
     def _fit(self, train_data_generator=None, test_data_generator=None, train_directory=None, test_directory=None,
-             train_set=None, test_set=None, image_shape=None, epochs=None, steps_per_epoch=None, validation_steps=None,
+             train_set=None, test_set=None, target_size=None, epochs=None, steps_per_epoch=None, validation_steps=None,
              batch_size=None, verbose=None):
         if batch_size is None:
             raise Exception("batch_size must not be None")
 
-        self.image_shape = image_shape
+        self.image_shape = target_size
         self.batch_size = batch_size
 
         if self.generator:
@@ -91,8 +97,8 @@ class CustomCnn:
                 raise Exception("epochs must not be None")
             if validation_steps is None:
                 raise Exception("validation_steps must not be None")
-            if image_shape is None:
-                raise Exception("image_shape must not be None")
+            if target_size is None:
+                raise Exception("target_size must not be None")
 
             self.train_set = train_data_generator.flow_from_directory(
                 train_directory,
@@ -136,7 +142,7 @@ class CustomCnn:
             self.model.fit(self.x_train, self.y_train, validation_data=test_set,
                            epochs=epochs, batch_size=batch_size, verbose=verbose)
 
-    def _evaluate(self, x_data, y_data):
+    def _evaluate(self, x_data=None, y_data=None):
         if self.generator:
             return self.model.evaluate_generator(self.test_set)
         if not self.generator:
@@ -145,7 +151,10 @@ class CustomCnn:
     def _predict(self, img):
         if self.generator:
             result = self.model.predict(img)
-            label = self.class_indices[np.argmax(result[0])]
+            label = ""
+            for key, value in self.class_indices.items():
+                if value == np.argmax(result[0]):
+                    label = key
             return label
 
         if not self.generator:
@@ -159,20 +168,7 @@ class CustomCnn:
 
         data = {"generator": self.generator, "image_shape": self.image_shape, "batch_size": self.batch_size,
                 "model_name": self.model_name, "class_indices": self.class_indices,
-                "model": directory + self.model_name + ".h5"}
-        try:
-            data["train_set"] = self.train_set
-            data["test_set"] = self.test_set
-        except:
-            pass
-
-        try:
-            data["x_train"] = self.x_train.tolist()
-            data["y_train"] = self.y_train.tolist()
-            data["x_test"] = self.x_test.tolist()
-            data["y_test"] = self.y_test.tolist()
-        except:
-            pass
+                "model": os.path.abspath(directory + self.model_name + ".h5")}
 
         with open(directory + self.model_name + ".json", "w") as f:
             json.dump(data, f)
@@ -183,7 +179,7 @@ class CustomCnn:
         if model_name is None:
             raise Exception("model_name must not be None")
 
-        with open(directory + model_name + ".json", "r") as f:
+        with open(os.path.abspath(directory + model_name + ".json"), "r") as f:
             json_data = json.load(f)
             self.generator = json_data["generator"]
             self.image_shape = json_data["image_shape"]
@@ -192,12 +188,6 @@ class CustomCnn:
             self.class_indices = json_data["class_indices"]
             self.model = load_model(json_data["model"])
 
-            if "train_set" in json_data.keys():
-                self.train_set = json_data["train_set"]
-                self.test_set = json_data["test_set"]
-
-            elif "x_train" in json_data.keys():
-                self.x_train = json_data["x_train"]
-                self.y_train = json_data["y_train"]
-                self.x_test = json_data["x_test"]
-                self.y_test = json_data["y_test"]
+    def _info(self):
+        return {"generator": self.generator, "image_shape": self.image_shape, "batch_size": self.batch_size,
+                "model_name": self.model_name, "class_indices": self.class_indices}
