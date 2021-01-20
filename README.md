@@ -44,7 +44,7 @@ import keras
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 
-custom_cnn = CustomCnn(generator=False, model_name="mnist_test1")
+custom_cnn = CustomCnn(generator=False, model_name="mnist_test1")  # init
 input_shape = (28, 28, 1)
 
 (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
@@ -58,6 +58,7 @@ epochs = 3
 y_train = keras.utils.to_categorical(y_train, class_n)
 y_test = keras.utils.to_categorical(y_test, class_n)
 
+# modeling
 custom_cnn._modeling(model_info=[
                         Conv2D(32, kernel_size=(5, 5), strides=(1, 1), padding="same", activation="relu", input_shape=input_shape),
                         MaxPooling2D(pool_size=(2, 2), strides=(2, 2)),
@@ -70,18 +71,20 @@ custom_cnn._modeling(model_info=[
                         Dense(class_n, activation="softmax")
                      ])
 
-custom_cnn._summary()
+custom_cnn._summary()  # summary
 
+# compiling
 custom_cnn._compiling(loss="categorical_crossentropy",
     optimizer="adam",
     metrics=["accuracy"]
 )
 
-custom_cnn._fit(train_set=(x_train, y_train), test_set=(x_test, y_test), epochs=epochs, batch_size=batch_size, verbose=0)
-score = custom_cnn._evaluate(x_data=x_test, y_data=y_test)
+custom_cnn._fit(train_set=(x_train, y_train), test_set=(x_test, y_test), epochs=epochs, batch_size=batch_size, verbose=0)  # fit
+score = custom_cnn._evaluate(x_data=x_test, y_data=y_test)  # evaluate model
 print(score)
 
-custom_cnn._save_model("./test/")
+custom_cnn._save_model("./test/")  # save model
+## saved model as file "mnist_test1" (model_name)
 ```
 
 CnnSet example
@@ -96,13 +99,16 @@ print(pred)
 ## 3
 
 cnn_set._save_cnn_set("./")  # save cnn_set
-
+## save directory and files as "cnn_set1" (cnn_set_name)
 
 cnn_set._load_cnn_set(cnn_set_path = "./cnn_set1")  # load cnn_set
+## load previously saved cnn_set
 
 cnn_set._info()  # info
 
 cnn_set._delete_model("mnist_test1") # delete model
+## delete one model in cnn_set
 
 cnn_set._delete_cnn_set()  # delete cnn_set
+## delete all model (cnn_set)
 ```
