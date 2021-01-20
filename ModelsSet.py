@@ -3,6 +3,8 @@ import os
 
 
 class CnnSet:
+
+    # 초기화
     def __init__(self, cnn_set_name):
         if cnn_set_name is None:
             raise Exception("cnn_set_name must not be None")
@@ -10,6 +12,7 @@ class CnnSet:
         self.cnn_set_name = cnn_set_name
         self.path = ""
 
+    # 모델을 추가하는 메소드.
     def _add_model(self, model=None):
         if model is None:
             raise Exception("model must not be None")
@@ -18,6 +21,7 @@ class CnnSet:
 
         self.cnn_set[model.model_name] = model
 
+    # CnnSet 을 저장하는 메소드.
     def _save_cnn_set(self, directory=None):
         if directory is None:
             raise Exception("directory must not be None")
@@ -29,6 +33,7 @@ class CnnSet:
         for model_name, model in self.cnn_set.items():
             model._save_model(self.path + "/")
 
+    # CnnSet 을 로드하는 메소드.
     def _load_cnn_set(self, cnn_set_path=None):
         if cnn_set_path is None:
             raise Exception("cnn_set_path must not be None")
@@ -47,12 +52,14 @@ class CnnSet:
             custom_cnn._load_model(self.path + "/", model_name)
             self.cnn_set[model_name] = custom_cnn
 
+    # CnnSet 안의 단일 모델을 반환하는 메소드.
     def _get(self, model_name=None):
         if model_name is None:
             raise Exception("model_name must not be None")
 
         return self.cnn_set[model_name]
 
+    # CnnSet 안의 단일 모델을 삭제하는 메소드.
     def _delete_model(self, model_name=None):
         if model_name is None:
             raise Exception("model_name must not be None")
@@ -68,6 +75,7 @@ class CnnSet:
         except:
             pass
 
+    # CnnSet 을 삭제하는 메소드.
     def _delete_cnn_set(self):
         self.cnn_set = {}
         file_list = os.listdir(self.path + "/")
@@ -75,10 +83,6 @@ class CnnSet:
             os.remove(self.path + "/" + file)
         os.rmdir(self.path)
 
+    # 정보를 반환하는 메소드.
     def _info(self):
         return {"cnn_set": list(self.cnn_set.keys()), "cnn_set_name": self.cnn_set_name, "path": self.path}
-
-## 1. 모델 추가 메소드
-## 2. 저장 메소드
-## 3. 로드 메소드
-## 4. 삭제 메소드
