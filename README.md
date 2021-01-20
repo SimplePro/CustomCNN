@@ -1,8 +1,6 @@
 # CustomCNN
 ------------------
-#### 더 쉽게 이미지 분류 작업을 할 수 있도록 도와주는 모듈
-
-CustomCnn 기능
+CustomCnn function
 -----------
 1. auto modeling
 2. modeling
