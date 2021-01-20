@@ -1,7 +1,12 @@
 # CustomCNN
 ------------------
-CustomCnn function
+CustomCnn
 -----------
+Introduce
+--------
+#### if you use Custom Cnn, you can CNN more simply more than before  
+Function
+--------
 1. auto modeling
 2. modeling
 3. compiling
@@ -14,7 +19,14 @@ CustomCnn function
 10. load_model
 11. return info
 
-CnnSet function
+CnnSet
+-------
+Introduce
+----------
+#### if you use CnnSet, you can save CustomCnn Model as files in one directory,  
+#### you can CNN more easy and systematically than before  
+
+Function
 ----------------
 1. add model
 2. save CnnSet
