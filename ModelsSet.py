@@ -8,6 +8,7 @@ class CnnSet:
     def __init__(self, cnn_set_name):
         if cnn_set_name is None:
             raise Exception("cnn_set_name must not be None")
+
         self.cnn_set = {}
         self.cnn_set_name = cnn_set_name
         self.path = ""
@@ -30,7 +31,8 @@ class CnnSet:
 
         self.path = directory + self.cnn_set_name
         os.makedirs(self.path)
-        for model_name, model in self.cnn_set.items():
+        items = self.cnn_set.items()
+        for model_name, model in items:
             model._save_model(self.path + "/")
 
     # method to load CnnSet
@@ -49,15 +51,19 @@ class CnnSet:
 
         for model_name in file_list:
             custom_cnn = CustomCnn(model_name="!@#&(*$!^@#")
-            custom_cnn._load_model(self.path + "/", model_name)
-            self.cnn_set[model_name] = custom_cnn
+            try:
+                custom_cnn._load_model(self.path + "/", model_name)
+                self.cnn_set[model_name] = custom_cnn
+            except:
+                pass
 
     # method to return one model in CnnSet
     def _get(self, model_name=None):
         if model_name is None:
             raise Exception("model_name must not be None")
 
-        return self.cnn_set[model_name]
+        get_model = self.cnn_set[model_name]
+        return get_model
 
     # method to delete one model in CnnSet
     def _delete_model(self, model_name=None):
@@ -79,6 +85,7 @@ class CnnSet:
     def _delete_cnn_set(self):
         self.cnn_set = {}
         file_list = os.listdir(self.path + "/")
+
         for file in file_list:
             os.remove(self.path + "/" + file)
         os.rmdir(self.path)
