@@ -6,6 +6,8 @@ from keras.layers import *
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.preprocessing import image
 
+from Preprocessing import ImagePreprocess
+
 import os
 
 
@@ -236,3 +238,82 @@ class CustomCnn(BaseModeling):
     def _info(self):
         return {"generator": self.generator, "image_shape": self.image_shape, "batch_size": self.batch_size,
                 "model_name": self.model_name, "class_indices": self.class_indices}
+
+
+class SimpleCnn(CustomCnn, ImagePreprocess):
+
+    def __init__(self, generator=False, model_name=None):
+        super().__init__(generator, model_name)
+        self.image_shape = ()
+        self.train_set = None
+        self.test_set = None
+
+    def set_dataset(self, train_set=None, test_set=None, train_directory=None, test_directory=None, dsize=None):
+        if not self.generator:
+            if train_set is None:
+                raise Exception("train_set must not be None")
+            if test_set is None:
+                raise Exception("test_set must not be None")
+
+            self.train_set = train_set
+            self.test_set = test_set
+
+        if self.generator:
+            if dsize is None:
+                raise Exception("dsize must not be None")
+            self.resize_img(directory=train_directory, size=dsize)
+            self.resize_img(directory=test_directory, size=dsize)
+
+            self.image_shape = dsize
+
+            self.train_set = self.trainDataGen.flow_from_directory(
+                train_directory,
+                batch_size=128,
+                target_size=self.image_shape,
+                class_mode='categorical'
+            )
+
+            self.test_set = self.testDataGen.flow_from_directory(
+                test_directory,
+                batch_size=128,
+                target_size=self.image_shape,
+                class_mode="categorical"
+            )
+
+            self.class_indices = self.test_set.class_indices
+
+    def fit(self, class_n, input_shape=None, epochs=None):
+        if epochs is None:
+            raise Exception("epochs must not be None")
+
+        if self.generator:
+            self._auto_modeling(input_shape=(100, 100, 3), class_n=class_n)
+            self._compiling(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
+
+            self.model.fit_generator(
+                self.train_set,
+                steps_per_epoch=30,
+                epochs=epochs,
+                validation_data=self.test_set,
+                validation_steps=10
+            )
+
+        if not self.generator:
+            if input_shape is None:
+                raise Exception("input_shape must not be None")
+
+            self._auto_modeling(input_shape=input_shape, class_n=class_n)
+            self._compiling(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
+            self.model.fit(self.train_set[0], self.train_set[1], validation_data=self.test_set,
+                           epochs=epochs, batch_size=128, verbose=0)
+
+    def predict(self, x):
+        if self.generator:
+            img = self.img_to_pred(x)
+            pred = self._predict(img)
+            return pred
+
+        if not self.generator:
+            pred = self.model.predict_classes(x)
+            return pred
+
