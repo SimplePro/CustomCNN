@@ -4,19 +4,12 @@ import json
 
 from keras.layers import *
 from keras.layers.convolutional import Conv2D, MaxPooling2D
+from keras.preprocessing import image
 
 import os
 
 
-class CustomCnn:
-
-    # init
-    def __init__(self, generator=False, model_name=None):
-        if model_name is None:
-            raise Exception("model_name must not be None")
-        self.generator = generator
-        self.model_name = model_name
-        self.class_indices = {}
+class BaseModeling:
 
     # auto modeling
     def _auto_modeling(self, input_shape=None, class_n=None):
@@ -24,6 +17,7 @@ class CustomCnn:
             raise Exception("input_shape must not be None")
         if class_n is None:
             raise Exception("class_n must not be None")
+
         self.model = Sequential()
         self.model.add(Conv2D(64, kernel_size=(3, 3), padding='same', input_shape=input_shape, activation='relu'))
         self.model.add(MaxPooling2D(pool_size=(2, 2)))
@@ -77,6 +71,18 @@ class CustomCnn:
     # summary
     def _summary(self):
         return self.model.summary()
+
+
+class CustomCnn(BaseModeling):
+
+    # init
+    def __init__(self, generator=False, model_name=None):
+        if model_name is None:
+            raise Exception("model_name must not be None")
+
+        self.generator = generator
+        self.model_name = model_name
+        self.class_indices = {}
 
     # method to set train_set and test_set again
     def _set_data_generator(self, train_set, test_set):
@@ -152,28 +158,54 @@ class CustomCnn:
     # evaluate model
     def _evaluate(self, x_data=None, y_data=None):
         if self.generator:
-            return self.model.evaluate_generator(self.test_set)
+            evaluate_score = self.model.evaluate_generator(self.test_set)
+            return evaluate_score
+
         if not self.generator:
-            return self.model.evaluate(x_data, y_data)
+            evaluate_score = self.model.evaluate(x_data, y_data)
+            return evaluate_score
 
     # predict
-    def _predict(self, img):
+    def _predict(self, x):
+
         if self.generator:
-            result = self.model.predict(img)
+            result = self.model.predict(x)
             label = ""
-            for key, value in self.class_indices.items():
+            items = self.class_indices.items()
+            for key, value in items:
                 if value == np.argmax(result[0]):
                     label = key
+
             return label
 
         if not self.generator:
-            label = self.model.predict_classes(img)
+            label = self.model.predict_classes(x)
             return label
+
+    # predict img
+    def _predict_img(self, img=None, path=None):
+        if img is None and path is None:
+            raise Exception("img and path must not be None")
+
+        result = 0
+
+        try:
+            img = image.load_img(path)
+        except:
+            raise Exception("the image file could not be found in the specified path.")
+
+        if not img is None:
+            img = image.img_to_array(img)
+            img = np.expand_dims(img, axis=0)
+            result = self._predict(img)
+
+        return result
 
     # method to save model as file
     def _save_model(self, directory=None):
         if directory is None:
             raise Exception("directory must not be None")
+
         self.model.save(directory + self.model_name + ".h5")
 
         data = {"generator": self.generator, "image_shape": self.image_shape, "batch_size": self.batch_size,
@@ -192,12 +224,13 @@ class CustomCnn:
 
         with open(os.path.abspath(directory + model_name + ".json"), "r") as f:
             json_data = json.load(f)
-            self.generator = json_data["generator"]
-            self.image_shape = json_data["image_shape"]
-            self.batch_size = json_data["batch_size"]
-            self.model_name = json_data["model_name"]
-            self.class_indices = json_data["class_indices"]
-            self.model = load_model(json_data["model"])
+
+        self.generator = json_data["generator"]
+        self.image_shape = json_data["image_shape"]
+        self.batch_size = json_data["batch_size"]
+        self.model_name = json_data["model_name"]
+        self.class_indices = json_data["class_indices"]
+        self.model = load_model(json_data["model"])
 
     # method to return info
     def _info(self):
