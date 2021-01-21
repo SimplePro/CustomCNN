@@ -17,24 +17,12 @@ Function
 8. predict (ImageDataGenerator version, Generally version)
 9. save_model
 10. load_model
-11. return info
+11. return info  
 
-CnnSet
--------
-Introduce
-----------
-#### if you use CnnSet, you can save CustomCnn Model as files in one directory,  
-#### you can CNN more easy and systematically than before  
-
-Function
-----------------
-1. add model
-2. save CnnSet
-3. load CnnSet
-4. return one model in CnnSet
-5. delete one model in CnnSet
-6. delete CnnSet
-7. return info
+Point
+---------
+method to save model is save model and info json file,
+and method to load model is load model and model info.  
 
 CustomCnn example
 ------------
@@ -86,6 +74,24 @@ print(score)
 custom_cnn._save_model("./test/")  # save model
 ## saved model as file "mnist_test1" (model_name)
 ```
+  
+
+CnnSet
+-------
+Introduce
+----------
+#### if you use CnnSet, you can save CustomCnn Model as files in one directory,  
+#### you can CNN more easy and systematically than before  
+
+Function
+----------------
+1. add model
+2. save CnnSet
+3. load CnnSet
+4. return one model in CnnSet
+5. delete one model in CnnSet
+6. delete CnnSet
+7. return info  
 
 CnnSet example
 -----------
