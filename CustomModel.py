@@ -8,6 +8,8 @@ from keras.preprocessing import image
 
 from Preprocessing import ImagePreprocess
 
+from keras_preprocessing.image import ImageDataGenerator
+
 import os
 
 
@@ -33,14 +35,7 @@ class BaseModeling:
         self.model.add(MaxPooling2D(pool_size=(2, 2)))
         self.model.add(Dropout(0.25))
 
-        self.model.add(Conv2D(512, kernel_size=(3, 3), padding='same', activation='relu'))
-        self.model.add(MaxPooling2D(pool_size=(2, 2)))
-        self.model.add(Dropout(0.25))
-
         self.model.add(Flatten())
-
-        self.model.add(Dense(512, activation="relu"))
-        self.model.add(Dropout(0.25))
 
         self.model.add(Dense(256, activation='relu'))
         self.model.add(Dropout(0.25))
@@ -244,6 +239,15 @@ class SimpleCnn(CustomCnn, ImagePreprocess):
 
     def __init__(self, generator=False, model_name=None):
         super().__init__(generator, model_name)
+
+        self.trainDataGen = ImageDataGenerator(rescale=1. / 255, rotation_range=30, width_shift_range=0.1,
+                                               height_shift_range=0.1,
+                                               shear_range=0.2, zoom_range=0.2, horizontal_flip=True,
+                                               vertical_flip=True,
+                                               fill_mode='nearest')
+
+        self.testDataGen = ImageDataGenerator(rescale=1. / 255)
+
         self.image_shape = ()
         self.train_set = None
         self.test_set = None
@@ -285,9 +289,11 @@ class SimpleCnn(CustomCnn, ImagePreprocess):
     def fit(self, class_n, input_shape=None, epochs=None):
         if epochs is None:
             raise Exception("epochs must not be None")
+        if input_shape is None:
+            raise Exception("input_shape must not be None")
 
         if self.generator:
-            self._auto_modeling(input_shape=(100, 100, 3), class_n=class_n)
+            self._auto_modeling(input_shape=input_shape, class_n=class_n)
             self._compiling(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
 
             self.model.fit_generator(
@@ -307,13 +313,26 @@ class SimpleCnn(CustomCnn, ImagePreprocess):
             self.model.fit(self.train_set[0], self.train_set[1], validation_data=self.test_set,
                            epochs=epochs, batch_size=128, verbose=0)
 
-    def predict(self, x):
+    def predict(self, x=None, path=None):
+        if x is None and path is None:
+            raise Exception("x and path must not be None")
         if self.generator:
-            img = self.img_to_pred(x)
-            pred = self._predict(img)
-            return pred
+            if path is None:
+                img = self.img_to_pred(x)
+                pred = self._predict(img)
+                return pred
+            
+            if not path is None:
+                img = image.load_img(path)
+                img = self.img_to_pred(img)
+                pred = self._predict(img)
+                return pred
 
         if not self.generator:
-            pred = self.model.predict_classes(x)
+            if x.ndim == 4:
+                pred = self.model.predict_classes(x)
+            elif x.ndim == 3:
+                pred_data = np.expand_dims(x, axis=0)
+                pred = self.model.predict_classes(pred_data)
             return pred
 
