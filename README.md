@@ -74,8 +74,44 @@ print(score)
 custom_cnn._save_model("./test/")  # save model
 ## saved model as file "mnist_test1" (model_name)
 ```
-  
 
+SimpleCnn
+------
+Introduce
+------
+#### if you use SimpleCnn, you can Cnn very simple better than before
+
+Function
+-------
+1. auto modeling
+2. modeling
+3. compiling
+4. summary
+5. set data generator
+6. fit (ImageDataGenerator version, Generally version)
+7. evaluate (ImageDataGenerator version, Generally version)
+8. predict (ImageDataGenerator version, Generally version)
+9. save_model
+10. load_model
+11. return info  
+12. set data
+
+Point
+---------
+very simple Cnn, done.
+
+SimpleCnn example
+-------
+``` python
+>>> from CustomModel import SimpleCnn
+>>> simple_cnn = SimpleCnn(generator=True, model_name="dog_cat_dl")
+>>> simple_cnn.set_dataset(train_directory="./dog_cat_dataset/training_set/", test_directory="./dog_cat_dataset/test_set/", dsize=(64, 64))
+>>> simple_cnn.fit(class_n=2, input_shape=(64, 64, 3), epochs=80)
+>>> pred = simple_cnn.predict(path="./dog_cat_dataset/test_set/cats/cat0.jpg")
+>>> print(pred)
+>>> "cats"
+```
+  
 CnnSet
 -------
 Introduce
